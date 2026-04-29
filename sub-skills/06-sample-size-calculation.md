@@ -122,6 +122,15 @@ print(f"固定样本 {N}，最多允许约 {int(max_params)} 个参数")
 
 ---
 
+## 延伸阅读：外部验证的样本量
+
+本指南覆盖**开发阶段**的样本量。若计划进行外部验证，需单独计算验证样本量：
+
+- **参考：** Riley RD 等. *Calculating the sample size required for an external validation study of a clinical prediction model.* **BMJ** 2024;384:e078073. DOI: [10.1136/bmj-2023-078073](https://doi.org/10.1136/bmj-2023-078073)
+- **R 包：** `pmvalsampsize`
+- **关键输入：** 预期 C-statistic、预期校准斜率、预期 O/E ratio、置信区间宽度
+
+---
 ## 质量检查清单
 
 - [ ] 分析前已完成样本量计算
