@@ -61,6 +61,17 @@
 - [时间-事件型结局](sub-skills/outcome-specific-paths.md#时间-事件型结局)
 - [竞争风险](sub-skills/outcome-specific-paths.md#竞争风险)
 - [有序分类结局](sub-skills/outcome-specific-paths.md#有序分类结局)
+- [无序多分类结局](sub-skills/outcome-specific-paths.md#无序多分类结局)
+
+---
+
+## 进阶主题
+
+| 主题 | 内容 | 适用场景 |
+|------|------|----------|
+| [动态预测与纵向数据](sub-skills/14-dynamic-longitudinal-prediction.md) | Landmarking、联合模型、动态风险更新 | 重复测量、随访数据 |
+| [模型更新与再校准](sub-skills/15-model-updating-recalibration.md) | 简单/全面再校准、模型修正与扩展 | 模型过时、外部验证失败 |
+| [算法公平性评估](sub-skills/16-algorithm-fairness.md) | 亚组性能比较、公平性指标、修正策略 | 多人群应用、健康公平 |
 
 ---
 

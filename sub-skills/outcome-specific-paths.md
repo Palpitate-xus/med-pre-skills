@@ -136,6 +136,88 @@ n_survival = events_needed / 0.12  # 除以事件发生率
 
 ---
 
+## 无序多分类结局
+
+### 场景
+结局有多个类别但无自然顺序（如：肿瘤分子分型、病原体鉴定、不同不良事件类型）
+
+### 模型选择
+
+| 方法 | Python 库 | 说明 |
+|------|-----------|------|
+| Multinomial Logistic | `statsmodels MNLogit` / `sklearn LogisticRegression(multi_class='multinomial')` | 基准方法，可解释性强 |
+| 随机森林 | `sklearn RandomForestClassifier` | 捕捉非线性，无需预设交互 |
+| XGBoost / LightGBM | `xgboost` / `lightgbm` | 大样本时性能通常最优 |
+
+### Python 代码
+
+```python
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import log_loss
+
+# Multinomial Logistic Regression
+# solver='lbfgs' 支持 multinomial；C 为逆正则化强度
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+model = LogisticRegression(
+    multi_class='multinomial',
+    solver='lbfgs',
+    C=1.0,          # 调小 C 增加正则化
+    max_iter=1000
+)
+model.fit(X_scaled, y)
+
+# 预测各类别概率
+pred_prob = model.predict_proba(X_scaled)
+
+# 多分类 LogLoss（越低越好）
+print(f"LogLoss: {log_loss(y, pred_prob):.3f}")
+```
+
+### 性能指标
+
+| 指标 | 说明 | 理想值 |
+|------|------|--------|
+| **LogLoss / Cross-entropy** | 概率准确性 | 越低越好 |
+| **Multiclass AUC** | OvO（One-vs-One）或 OvR（One-vs-Rest） | ≥ 0.7 可接受 |
+| **Top-k Accuracy** | 真实类别在前 k 个预测中的比例 | 依场景判断 |
+| **Kappa / Weighted Kappa** | 校正机遇一致率 | ≥ 0.6 可接受 |
+
+### 校准
+
+多分类校准比二分类更复杂，常用方法：
+
+```python
+from sklearn.calibration import CalibratedClassifierCV
+
+# Platt 缩放（sigmoid）或等渗回归（isotonic）
+calibrated = CalibratedClassifierCV(
+    base_estimator=model,
+    method='sigmoid',   # 或 'isotonic'
+    cv=5
+)
+calibrated.fit(X_scaled, y)
+calibrated_probs = calibrated.predict_proba(X_scaled)
+```
+
+**报告要点：**
+- 每个类别的校准图（predicted vs. observed probability）
+- 多项式 Brier Score（多分类版本的 Brier Score）
+- 避免将无序多分类强行二分类化（如"类别 A vs. 其他"会损失信息并引入偏倚）
+
+### 质量检查清单
+
+- [ ] 确认结局确实为无序（若无序却被当作有序处理，会引入错误假设）
+- [ ] 报告各类别的先验比例（class imbalance 需考虑加权或分层抽样）
+- [ ] 评估每个类别的区分度和校准，而非仅整体准确率
+- [ ] 避免将多分类问题拆分为多个二分类子问题（除非有明确临床理由）
+
+---
+
 ## 返回 Router
 
 ← [返回主指南](../clinical-prediction-model-development-zh.md)
